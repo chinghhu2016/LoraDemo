@@ -5,20 +5,107 @@
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: content: https://ssl.gstatic.com; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
     <script src="components/loader.js"></script>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <title>Parking Demo</title>    
     <link rel="stylesheet" href="components/loader.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css">
     <script>
         // PhoneGap event handler
         document.addEventListener("deviceready", onDeviceReady, false);
         function onDeviceReady() {
             console.log("PhoneGap is ready");
+            initMQ();
+        }
+        
+        function addSpace(device, id) {
+            var el = document.createElement("DIV");
+            el.id = id;
+            el.innerHTML = device;
+            el.classList.add("ParkSpace");
+            document.getElementById("parkinglot").appendChild(el);
+            INFO("Add space for " + device);
+            return el;
+        }
+        
+        function setSpace(data) {
+            var id = "parkspace_" + data.device;
+            var el = document.getElementById(id);
+            if (!el) {
+                console.log("Add space:" + id)
+                el = addSpace(data.device, id)
+            }
+            console.log('data.state=' + data.state)
+            if (data.state === '1') {
+                el.classList.add("Occupied");
+            } else {
+                el.classList.remove("Occupied");
+            }
+            el.dataset.parkdata = data;
+        }
+        
+        function INFO(message, interval) {
+            showMessage(message, interval, 'Info')
+        }
+
+        function WARN(message, interval) {
+            showMessage(message, interval, 'Warn')            
+        }
+        
+        function ERROR(message, interval) {
+            showMessage(message, interval, 'Error')            
+        }
+
+        function showMessage(message, interval, type) {
+            var el = document.createElement("DIV");
+            el.innerHTML = message;
+            el.classList.add("Message");
+            type = !type ? 'Info' : type;
+            el.classList.add(type);                
+            document.getElementById("messages").appendChild(el);
+            if (!interval) {
+                interval = 2000;
+            }
+            setTimeout(function(){ el.parentNode.removeChild(el); }, interval);
+        }
+        
+        function initMQ() {
+            client = mqtt.connect('ws://iot.eclipse.org:80/ws')
+            INFO('Connecting...');
+            client.on('connect', function () {
+                INFO('Connected');
+                client.subscribe('isentek/device/#')
+                // client.publish('presence', 'Hello mqtt')
+            })
+
+            client.on('message', function (topic, messageBuffer) {
+                var message = messageBuffer.toString();
+                console.log("message: " + message);
+                var values = message.split('/');
+                if (values.length >= 3) { 
+                    setSpace({ device: values[0], time: values[1], state: values[2] })
+                } else {
+                    WARN("Bad message: " + message.toString());
+                }
+            })
+            
+            client.on('reconnect', function() {
+                console.log('reconnecting');
+                INFO('Reconnecting...');
+            })
         }
     </script>
 </head>
 <body>
-
-    <h1>HelloWorld!</h1>
-    <a class="button--large" href="phonegap-demo.html">Start Demo</a>
-
+  <div class="Container">
+    <h1 class="Title">Parking Lot</h1>
+    <div id="videoBox">
+      <img id="camera" src="http://128.97.43.214/mjpg/video.mjpg?resolution=352x288"></img>
+    </div>
+    <div id="parkinglot">
+    </div>
+    <div id="messages">
+    </div>
+  </div>
 </body>
 </html>
