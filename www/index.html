@@ -19,6 +19,7 @@
         }
         
         function addSpace(device, id) {
+            console.log("Add space:" + id)
             var el = document.createElement("DIV");
             el.id = id;
             el.innerHTML = device;
@@ -28,13 +29,31 @@
             return el;
         }
         
-        function setSpace(data) {
-            var id = "parkspace_" + data.device;
-            var el = document.getElementById(id);
-            if (!el) {
-                console.log("Add space:" + id)
-                el = addSpace(data.device, id)
+        function ensureSpace(device) {
+            var id = "parkspace_" + device;
+            // check if space existing
+            var elSpace = document.getElementById(id);
+            if (elSpace) {
+                return elSpace;
             }
+            
+            // find invalid slot
+            var elNodes = document.querySelectorAll("#parkinglot div.ParkSpace.Invalid");
+            console.log("elNodes.length=" + elNodes.length)
+            if (elNodes && elNodes.length > 0) {
+                var el = elNodes[0];
+                el.id = id;
+                el.innerHTML = device;
+                el.classList.remove("Invalid");
+                INFO("Instantiate space for " + device);
+                return el;
+            } else {
+                return addSpace(device, id);
+            }
+        }
+        
+        function setSpace(data) {
+            var el = ensureSpace(data.device);
             console.log('data.state=' + data.state)
             if (data.state === '1') {
                 el.classList.add("Occupied");
@@ -103,6 +122,9 @@
       <img id="camera" src="http://128.97.43.214/mjpg/video.mjpg?resolution=352x288"></img>
     </div>
     <div id="parkinglot">
+      <div class="ParkSpace Invalid"></div>
+      <div class="ParkSpace Invalid"></div>
+      <div class="ParkSpace Invalid"></div>      
     </div>
     <div id="messages">
     </div>

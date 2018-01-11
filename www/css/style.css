@@ -78,7 +78,6 @@ h1.Title {
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
   padding: 0;
-  margin: 0;
   font: inherit;
   color: inherit;
   background: transparent;
@@ -117,13 +116,20 @@ h1.Title {
   font-size: 16px;
   font-weight: 500;
   line-height: 36px;
+  min-height: 60px;
   padding: 4px 20px;
+  margin: 8px auto;
   display: block;
-  width: 100%;
+  width: 85%;
 }
 
 .ParkSpace.Occupied {
     background-color: lightgreen;
+}
+
+.ParkSpace.Invalid {
+    border: 6px dashed #a0a0a0;
+    background-color: #c0c0c050;
 }
 
 #messages {
