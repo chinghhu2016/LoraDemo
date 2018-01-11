@@ -40,6 +40,7 @@
   <preference name="UIWebViewDecelerationSpeed" value="normal"/>
   <preference name="monaca:AndroidIsPackageNameSeparate" value="false"/>
   <preference name="ios-XCBuildConfiguration-TARGETED_DEVICE_FAMILY" value="1,2"/>
+  <plugin name="cordova-plugin-whitelist" source="npm" spec="~1.3.1" />
   <platform name="ios">
     <icon src="/res/ios/icon/icon.png" width="57" height="57"/>
     <icon src="/res/ios/icon/icon@2x.png" width="114" height="114"/>
